@@ -132,13 +132,15 @@ Here are 3 notebooks stored in the databricks workspace.
 
 ## Step 3: Build a Databricks job to run the pipeline
 
+[![CI](https://github.com/nogibjj/IDS706-Databricks-Pipeline-XS110/actions/workflows/cicd.yml/badge.svg)](https://github.com/nogibjj/IDS706-Databricks-Pipeline-XS110/actions/workflows/cicd.yml)
+
 To automate the data pipeline with a Databricks job, I created this `Songs_workflow`
 
 ![Alt text](image-2.png)
 
 ## Results
 
-Here is the results of the Songs_workflow, it is saved in [read.md]().
+Here is the results of the Songs_workflow, it is saved in [read.md](https://github.com/nogibjj/IDS706-Databricks-Pipeline-XS110/blob/main/result.md).
 
 Which artists released the most songs each year
 ![Alt text](image-5.png)
