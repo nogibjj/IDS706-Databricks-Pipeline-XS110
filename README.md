@@ -1,80 +1,147 @@
 
-# Use PySpark to perform data processing on a large dataset.
+# Data Pipeline with Databricks
 
-This project did data processing on a large dataset using PySpark. The dataset is stored in databricks data file system(DFS), specifically the orders and customers tables.
-## Setup
+This project is about how to create and deploy an end-to-end data processing pipeline, including how to ingest raw data, transform the data, and run analyses on the processed data. The dataset used in this project is a subset of the Million Song Dataset, a collection of features and metadata for contemporary music tracks. This dataset is available in the sample datasets included in the Databricks workspace(DBFS).
 
+## Step 1: Create a cluster
 
-### 1. Upload tables to databricks
+In the compute module, I created the `IDS706 cluster` in my Azure Databricks workspace by using the Azure Databricks portal.
 
-I used `add data` UI in databricks to upload the orders.csv and customers.csv to DFS. They are saved in `dbfs:/user/hive/warehouse`
-
-***customers:***
 ![Alt text](image-1.png)
 
-***orders:***
-![Alt text](image-2.png)
+## Step 2: Create ETL Notebook in Databricks
 
-### 3. Create a Spark cluster
+To perform an extract, transform, and load (ETL) workflow, I created 3 notebooks,
 
-![Alt text](image-5.png)
+- Create a Databricks notebook `Ingest song data` to ingest raw source data and write the raw data to a target table.
+``` python
+from pyspark.sql.types import DoubleType, IntegerType, StringType, StructType, StructField
 
-Create one cluster in my Azure Databricks workspace by using the Azure Databricks portal.
+# Define variables used in the code below
+file_path = "/databricks-datasets/songs/data-001/"
+table_name = "raw_song_data" # Replace "your_table_name" with the desired table name
+checkpoint_path = "/tmp/pipeline_get_started/_checkpoint/songss_data"
 
-### 2. create pyspark_data_preprocessing.py notebook in databricks
+schema = StructType(
+  [
+    StructField("artist_id", StringType(), True),
+    StructField("artist_lat", DoubleType(), True),
+    StructField("artist_long", DoubleType(), True),
+    StructField("artist_location", StringType(), True),
+    StructField("artist_name", StringType(), True),
+    StructField("duration", DoubleType(), True),
+    StructField("end_of_fade_in", DoubleType(), True),
+    StructField("key", IntegerType(), True),
+    StructField("key_confidence", DoubleType(), True),
+    StructField("loudness", DoubleType(), True),
+    StructField("release", StringType(), True),
+    StructField("song_hotnes", DoubleType(), True),
+    StructField("song_id", StringType(), True),
+    StructField("start_of_fade_out", DoubleType(), True),
+    StructField("tempo", DoubleType(), True),
+    StructField("time_signature", DoubleType(), True),
+    StructField("time_signature_confidence", DoubleType(), True),
+    StructField("title", StringType(), True),
+    StructField("year", IntegerType(), True),
+    StructField("partial_sequence", IntegerType(), True)
+  ]
+)
 
-I wrote my code in pyspark_data_preprocessing.py:
-
-code1
-![Alt text](image-3.png)
-code2
-![Alt text](image-4.png)
-
-
-I did:
-
-1. Loading data into a dataframe
-
-```python
-# Read data in Delta format
-orders = spark.read.format("delta").load('dbfs:/user/hive/warehouse/orders')
-customers = spark.read.format("delta").load('dbfs:/user/hive/warehouse/customers')
-```
-2. use spark SQL and filtering and grouping dataframe(see part3 in the following)
-
-
-### 3.Use of Spark SQL and Transformations
-
-***Spark SQL***: A SQL query is employed to fetch the top 10 customers who have placed the most orders. This serves as an example of leveraging Spark's SQL capabilities to extract insights directly from distributed datasets.
-
-```python
-# Spark SQL Query: Get top 10 customers who purchased most orders
-top_ordered = spark.sql(
-    """
-    SELECT customerName, COUNT(O.orderNumber) as orderNum
-    FROM customers AS C
-    LEFT JOIN orders AS O ON C.customerNumber = O.customerNumber
-    GROUP BY customerName
-    HAVING customerName IS NOT NULL
-    ORDER BY orderNum DESC
-    LIMIT 10
-"""
+(spark.readStream
+  .format("cloudFiles")
+  .schema(schema)
+  .option("cloudFiles.format", "csv")
+  .option("sep","\t")
+  .load(file_path)
+  .writeStream
+  .option("checkpointLocation", checkpoint_path)
+  .trigger(availableNow=True)
+  .toTable(table_name)
 )
 ```
-***Data Transformation***: PySpark's DataFrame API is utilized to transform the customer data. The data is first filtered to only include records from the USA. Subsequently, it's grouped by state to aggregate the count of customers in each state. This showcases the transformation capability of PySpark in handling and reshaping large datasets.
+- Create a Databricks notebook `Prepare song data` to transform the raw source data and write the transformed data to a target table. This is my data sink.
+```sql
+%sql
+CREATE OR REPLACE TABLE
+  Prepare_songs_data (
+    artist_id STRING,
+    artist_name STRING,
+    duration DOUBLE,
+    release STRING,
+    tempo DOUBLE,
+    time_signature DOUBLE,
+    title STRING,
+    year DOUBLE,
+    processed_time TIMESTAMP
+  );
 
-```python
-customers.filter(customers.country == "USA")
-  .groupBy("state")
-  .agg(count("customerNumber").alias("total_customer"))
-  .orderBy(desc("total_customer"))
-
+INSERT INTO
+  Prepare_songs_data
+SELECT
+  artist_id,
+  artist_name,
+  duration,
+  release,
+  tempo,
+  time_signature,
+  title,
+  year,
+  current_timestamp()
+FROM
+  raw_song_data
 ```
+
+- Create a Databricks notebook to query the transformed data.
+
+```sql
+%sql
+-- Which artists released the most songs each year?
+SELECT
+  artist_name,
+  count(artist_name)
+AS
+  num_songs,
+  year
+FROM
+  prepare_songs_data
+WHERE
+  year > 0
+GROUP BY
+  artist_name,
+  year
+ORDER BY
+  num_songs DESC,
+  year DESC;
+
+ -- Find songs for your DJ list
+ SELECT
+   artist_name,
+   title,
+   tempo
+ FROM
+   prepare_songs_data
+ WHERE
+   time_signature = 4
+   AND
+   tempo between 100 and 140;
+```
+Here are 3 notebooks stored in the databricks workspace.
+
+![Alt text](image.png)
+
+
+## Step 3: Build a Databricks job to run the pipeline
+
+To automate the data pipeline with a Databricks job, I created this `Songs_workflow`
+
+![Alt text](image-2.png)
 
 ## Results
 
-[![CI](https://github.com/nogibjj/IDS706-PySpark-Data-Preprocessing-XS110/actions/workflows/cicd.yml/badge.svg)](https://github.com/nogibjj/IDS706-PySpark-Data-Preprocessing-XS110/actions/workflows/cicd.yml)
+Here is the results of the Songs_workflow, it is saved in [read.md]().
 
-The results are converted to a user-friendly markdown format using the tabulate library and saved to [`result.md`](https://github.com/nogibjj/IDS706-PySpark-Data-Preprocessing-XS110/blob/main/result.md). This markdown file contains tables showing the top 10 customers by order volume and the count of customers for each state in the USA.
+Which artists released the most songs each year
+![Alt text](image-5.png)
 
-![Alt text](image.png)
+The DJs with highest tempo
+![Alt text](image-7.png)

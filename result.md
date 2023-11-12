@@ -1,25 +1,27 @@
-# Top Ordered Customers
-|    | customerName                 |   orderNum |
-|---:|:-----------------------------|-----------:|
-|  0 | Euro+ Shopping Channel       |         26 |
-|  1 | Mini Gifts Distributors Ltd. |         17 |
-|  2 | Danish Wholesale Imports     |          5 |
-|  3 | Down Under Souveniers, Inc   |          5 |
-|  4 | Dragon Souveniers, Ltd.      |          5 |
-|  5 | Australian Collectors, Co.   |          5 |
-|  6 | Reims Collectables           |          5 |
-|  7 | Corporate Gift Ideas Co.     |          4 |
-|  8 | Volvo Model Replicas, Co     |          4 |
-|  9 | The Sharp Gifts Warehouse    |          4 |
+# Top artists
+|    | artist_name                         |   num_songs |   year |
+|---:|:------------------------------------|------------:|-------:|
+|  0 | Beastie Boys                        |           5 |   1994 |
+|  1 | Roebeck                             |           4 |   2010 |
+|  2 | Maximo Park                         |           4 |   2009 |
+|  3 | Darla Farmer                        |           4 |   2009 |
+|  4 | Calvin Harris                       |           4 |   2007 |
+|  5 | Lucky Fonz III                      |           4 |   2007 |
+|  6 | Low Low Low La La La Love Love Love |           4 |   2007 |
+|  7 | Susana Félix                        |           4 |   2006 |
+|  8 | Ordo Rosarius Equilibrio            |           4 |   2006 |
+|  9 | Shinobu                             |           4 |   2006 |
 
-# Total Customers for Each State
-|    | state   |   total_customer |
-|---:|:--------|-----------------:|
-|  0 | CA      |               11 |
-|  1 | MA      |                9 |
-|  2 | NY      |                6 |
-|  3 | CT      |                4 |
-|  4 | PA      |                3 |
-|  5 | NJ      |                1 |
-|  6 | NH      |                1 |
-|  7 | NV      |                1 |
+# Top DJs
+|    | artist_name                             | title                                        |   tempo |
+|---:|:----------------------------------------|:---------------------------------------------|--------:|
+|  0 | Axel Fischer                            | Du Trägst Keine Liebe In Dir (Party Version) | 140     |
+|  1 | Status Quo                              | Another Shipwreck                            | 140     |
+|  2 | Senseless Eccentric Cabaret feat. Cyfer | Wir sind es wert (Factory Mix)               | 140     |
+|  3 | Armin van Buuren                        | Hold On To Me                                | 139.999 |
+|  4 | Rebeca                                  | Não há crise                                 | 139.999 |
+|  5 | Factoria                                | Collision Course                             | 139.999 |
+|  6 | Captain Hollywood pres. Boom Boxx       | Flying High                                  | 139.998 |
+|  7 | Jessica Folcker                         | Snowflakes                                   | 139.998 |
+|  8 | Rocko                                   | That's My Money                              | 139.997 |
+|  9 | Haywire                                 | How Big Is Your Telly?                       | 139.997 |
